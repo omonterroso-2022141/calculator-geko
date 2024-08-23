@@ -83,5 +83,35 @@ class MainActivity : AppCompatActivity() {
         temporal.text = temporal.text.toString() + boton.text.toString()
     }
 
+    fun equal(b: View){
+       calculate()
+        result.text = decimal.format(numberOne)
+        operation = ""
+
+    }
+
+
+
+    fun erased(b: View) {
+        val boton: Button = b as Button
+        if (boton.text.toString().trim() == "C") {
+
+
+            if (temporal.text.toString().isNotEmpty()) {
+                var actualDates: CharSequence = temporal.text.toString()
+                temporal.text = actualDates.subSequence(0, actualDates.length - 1)
+            } else {
+                numberOne = Double.NaN
+                numberTwo = Double.NaN
+                temporal.text = ""
+                result.text = ""
+            }
+        } else if (boton.text.toString().trim() == "CA") {
+            numberOne = Double.NaN
+            numberTwo = Double.NaN
+            temporal.text = ""
+            result.text = ""
+        }
+    }
 
 }
