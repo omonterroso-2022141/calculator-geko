@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import net.objecthunter.exp4j.ExpressionBuilder
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,6 +15,8 @@ class MainActivity : AppCompatActivity() {
         val multiply = "*"
         val divide = "/"
         val porcent = "%"
+        var expression: String = ""
+
 
     var operation = ""
     var numberOne:Double = Double.NaN
@@ -22,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var temporal:TextView
     lateinit var result:TextView
     lateinit var decimal:DecimalFormat
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,22 +39,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun changeOperator(b: View) {
-        if(temporal.text.isNotEmpty() || numberOne.toString()!="NaN"){
-
-        calculate()
         val boton: Button = b as Button
-        if (boton.text.toString().trim() == "÷") {
-            operation = "/"
-        } else if (boton.text.toString().trim() == "x") {
-            operation = "*"
-        } else {
-            operation = boton.text.toString().trim()
+        val operator = when (boton.text.toString().trim()) {
+            "÷" -> "/"
+            "x" -> "*"
+            else -> boton.text.toString().trim()
         }
-        result.text = decimal.format(numberOne) + operation
-        temporal.text = ""
 
-        }
+        expression += operator
+        result.text = expression
     }
+
 
     fun calculate() {
         try {
@@ -75,43 +75,65 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun selectionNumber(b: View){
-        val boton:Button = b as Button
-        if(temporal.text.toString()=="0"){
-            temporal.text=""
+    fun selectionNumber(b: View) {
+        val boton: Button = b as Button
+        expression += boton.text.toString()
+        result.text = expression
+    }
+
+    fun equal(b: View) {
+        try {
+
+            var expressionWithSqrt = expression.replace("√", "sqrt")
+
+            expressionWithSqrt = expressionWithSqrt.replace(Regex("(\\d+)%")) { matchResult ->
+                val number = matchResult.groupValues[1].toDouble()
+                (number / 100).toString()
+            }
+
+
+            val expressionEval = ExpressionBuilder(expressionWithSqrt).build()
+            val resultValue = expressionEval.evaluate()
+            result.text = decimal.format(resultValue)
+            expression = resultValue.toString()
+        } catch (e: Exception) {
+            result.text = "Error"
+            expression = ""
         }
-        temporal.text = temporal.text.toString() + boton.text.toString()
     }
-
-    fun equal(b: View){
-       calculate()
-        result.text = decimal.format(numberOne)
-        operation = ""
-
-    }
-
 
 
     fun erased(b: View) {
         val boton: Button = b as Button
         if (boton.text.toString().trim() == "C") {
+            if (expression.isNotEmpty()) {
 
-
-            if (temporal.text.toString().isNotEmpty()) {
-                var actualDates: CharSequence = temporal.text.toString()
-                temporal.text = actualDates.subSequence(0, actualDates.length - 1)
+                expression = expression.substring(0, expression.length - 1)
+                result.text = expression
             } else {
+
                 numberOne = Double.NaN
                 numberTwo = Double.NaN
+                operation = ""
                 temporal.text = ""
                 result.text = ""
             }
         } else if (boton.text.toString().trim() == "CA") {
+
             numberOne = Double.NaN
             numberTwo = Double.NaN
+            operation = ""
             temporal.text = ""
             result.text = ""
+            expression = ""
         }
     }
+
+    fun addParenthesis(b: View) {
+        val boton: Button = b as Button
+        expression += boton.text.toString()
+        result.text = expression
+    }
+
 
 }
